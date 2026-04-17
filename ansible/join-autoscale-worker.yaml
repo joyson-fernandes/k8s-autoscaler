@@ -1,0 +1,55 @@
+---
+# Join a single autoscale-pool worker to the cluster.
+# Invoked by the k8s-autoscaler with:
+#   ansible-playbook -i inventory.ini join-autoscale-worker.yaml \
+#       -e target_host=JOY-K8S-A01 -e target_ip=10.0.1.80
+#
+# Expects the VM to already exist (provisioned by Terraform) and the
+# cloud-init / template to have kubeadm + containerd installed.
+
+- name: Wait for new worker SSH
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Wait for SSH on {{ target_ip }}
+      wait_for:
+        host: "{{ target_ip }}"
+        port: 22
+        delay: 10
+        timeout: 600
+
+    - name: Add host to in-memory inventory
+      add_host:
+        name: "{{ target_host }}"
+        ansible_host: "{{ target_ip }}"
+        groups: autoscale_new
+
+- name: Generate fresh join command on leader
+  hosts: control_plane_leader
+  become: true
+  tasks:
+    - name: Create worker join command
+      shell: kubeadm token create --print-join-command
+      register: worker_join_command
+      changed_when: false
+
+- name: Join new autoscale worker
+  hosts: autoscale_new
+  become: true
+  tasks:
+    - name: Run worker join
+      shell: "{{ hostvars[groups['control_plane_leader'][0]]['worker_join_command']['stdout'] }}"
+      args:
+        creates: /etc/kubernetes/kubelet.conf
+
+- name: Wait for node to register as Ready
+  hosts: control_plane_leader
+  become: true
+  tasks:
+    - name: Wait until {{ target_host }} is Ready
+      shell: "kubectl get node {{ target_host | lower }} -o jsonpath='{.status.conditions[?(@.type==\"Ready\")].status}'"
+      register: node_ready
+      until: node_ready.stdout == "True"
+      retries: 30
+      delay: 10
+      changed_when: false

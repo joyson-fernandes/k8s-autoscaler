@@ -1,0 +1,18 @@
+[Unit]
+Description=k8s autoscaler (Karpenter-lite) — one tick per invocation
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=joyson
+Group=joyson
+Environment=AUTOSCALER_CONFIG=/etc/k8s-autoscaler/config.yaml
+Environment=KUBECONFIG=/home/joyson/.kube/config
+Environment=LOG_LEVEL=INFO
+ExecStart=/opt/k8s-autoscaler/venv/bin/python /opt/k8s-autoscaler/autoscaler.py
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

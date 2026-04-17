@@ -1,0 +1,28 @@
+min_nodes: 0
+max_nodes: 5
+
+# cadence: timer runs every 2 min; streaks count consecutive ticks
+scale_up_consecutive: 3          # 6 min of pending pods before adding a node
+scale_down_consecutive: 30       # 60 min of low util before removing a node
+scale_down_threshold_pct: 30.0
+cooldown_seconds: 900            # 15 min between any action
+
+# A-pool naming / addressing (must match terraform autoscale_workers list)
+pool_name_prefix: "JOY-K8S-A"
+pool_ip_base: "10.0.1.80"        # A01=10.0.1.80, A02=.81, ... A05=.84
+pool_netmask: 24
+
+terraform_dir: "/home/joyson/k8s-cluster"
+ansible_dir: "/home/joyson/k8s-cluster/ansible"
+tfvars_file: "autoscale.auto.tfvars"
+join_playbook: "join-autoscale-worker.yaml"
+
+kubectl: "/usr/bin/kubectl"
+terraform: "/usr/bin/terraform"
+ansible_playbook: "/usr/bin/ansible-playbook"
+
+# Replace with the Discord upgrade webhook URL after install
+discord_webhook: ""
+
+# SAFETY: starts in dry-run; flip to false only after reviewing logs
+dry_run: true
