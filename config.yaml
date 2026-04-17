@@ -17,8 +17,8 @@ ansible_dir: "/home/joyson/k8s-cluster/ansible"
 tfvars_file: "autoscale.auto.tfvars"
 join_playbook: "join-autoscale-worker.yaml"
 
-kubectl: "/usr/bin/kubectl"
-terraform: "/usr/bin/terraform"
+kubectl: "/usr/local/bin/kubectl"
+terraform: "/usr/local/bin/terraform"
 ansible_playbook: "/usr/bin/ansible-playbook"
 
 # Replace with the Discord upgrade webhook URL after install
