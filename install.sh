@@ -23,7 +23,8 @@ python3 -m venv "$INSTALL_DIR/venv"
 "$INSTALL_DIR/venv/bin/pip" install --quiet pyyaml
 
 echo "[4/6] Installing ansible playbook"
-cp "$REPO_DIR/ansible/join-autoscale-worker.yaml" "$HOME/k8s-cluster/ansible/"
+K8S_CLUSTER_DIR="${K8S_CLUSTER_DIR:-/home/joyson/k8s-cluster}"
+cp "$REPO_DIR/ansible/join-autoscale-worker.yaml" "$K8S_CLUSTER_DIR/ansible/"
 
 echo "[5/6] Installing systemd units"
 sudo cp "$REPO_DIR/systemd/k8s-autoscaler.service" /etc/systemd/system/
